@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ChatBuddy – Simple Chatbot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h2>🤖 ChatBuddy</h2>
+
+    <div class="chat-output" id="chat-box"></div>
+
+    <form id="chat-form">
+      <input type="text" id="user-input" placeholder="Type your message..." required>
+      <button type="submit">Send</button>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById("chat-form");
+    const chatBox = document.getElementById("chat-box");
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const inputField = document.getElementById("user-input");
+      const userInput = inputField.value.trim();
+      if (!userInput) return;
+
+      chatBox.innerHTML += `<div class="user-msg"><strong>You:</strong> ${userInput}</div>`;
+
+      try {
+        const response = await fetch("/get", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: "msg=" + encodeURIComponent(userInput),
+        });
+
+        const data = await response.json();
+        chatBox.innerHTML += `<div class="bot-msg"><strong>Bot:</strong> ${data.response}</div>`;
+      } catch (error) {
+        chatBox.innerHTML += `<div class="bot-msg"><strong>Bot:</strong> Error occurred.</div>`;
+      }
+
+      inputField.value = "";
+      chatBox.scrollTop = chatBox.scrollHeight;
+    };
+  </script>
+</body>
+</html>
